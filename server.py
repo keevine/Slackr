@@ -127,6 +127,13 @@ def listmessages():
 
     return dumps(channel_messages(token, channel_id, start), indent=4, sort_keys=True, default=str)
 
+@APP.route('/channel/details', methods = ['GET'])
+def details():
+    token = request.args.get('token')
+    channel_id = int(request.args.get('channel_id'))
+
+    return send(channel_details(token, channel_id))
+
 #########################   MESSAGE FUNCTIONS  ###########################
 
 @APP.route('/message/send', methods = ['POST'])
@@ -150,7 +157,7 @@ def reactmessages():
     token = request.form.get('token')
     message_id = request.form.get('message_id')
     react_id = request.form.get('react_id')
-    
+
     return send(message_react(token, message_id, react_id))
 
 @APP.route('/message/unreact', methods = ['POST'])
@@ -158,9 +165,9 @@ def unreactmessages():
     token = request.form.get('token')
     message_id = request.form.get('message_id')
     react_id = request.form.get('react_id')
-    
+
     return send(message_unreact(token, message_id, react_id))
-    
+
 @APP.route('/message/pin', methods = ['POST'])
 def pinmessages():
     token = request.form.get('token')
@@ -174,6 +181,6 @@ def unpinmessages():
     message_id = request.form.get('message_id')
 
     return send(message_unpin(token, message_id))
-    
+
 if __name__ == "__main__":
     APP.run(port=(sys.argv[1] if len(sys.argv) > 1 else 5000), debug=True)
