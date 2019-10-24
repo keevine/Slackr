@@ -101,7 +101,7 @@ In this iteration, you are expected to:
       * How often you met, and why you met that often
       * What methods you used to ensure that meetings were successful
       * What steps you took when things did not go to plan during iteration to
-      * Details on how you had multiple people working on the same code
+      * Details on how you had multiple people working on the same code 
 
     Write this in `teamwork.md`.
 
