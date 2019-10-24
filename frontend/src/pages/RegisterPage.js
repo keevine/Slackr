@@ -12,6 +12,8 @@ import {
 } from '@material-ui/core';
 import DeveloperOutlinedIcon from '@material-ui/icons/DeveloperModeOutlined';
 import React from 'react';
+import { toast } from 'react-toastify';
+import { DEFAULT_ERROR_TEXT } from '../utils/text';
 
 const useStyles = makeStyles((theme) => ({
   '@global': {
@@ -57,7 +59,10 @@ function RegisterPage({ setAuth, ...props }) {
         setAuth(data.token, data.u_id);
         props.history.push('/');
       })
-      .catch((err) => {});
+      .catch((err) => {
+        console.error(err);
+        toast.error(DEFAULT_ERROR_TEXT);
+      });
   }
 
   const classes = useStyles();

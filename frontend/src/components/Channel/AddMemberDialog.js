@@ -11,6 +11,8 @@ import {
   TextField,
 } from '@material-ui/core';
 import AuthContext from '../../AuthContext';
+import { toast } from 'react-toastify';
+import { DEFAULT_ERROR_TEXT } from '../../utils/text';
 
 function AddMemberDialog({ channel_id, ...props }) {
   const [open, setOpen] = React.useState(false);
@@ -23,15 +25,18 @@ function AddMemberDialog({ channel_id, ...props }) {
   }
   function handleSubmit(event) {
     event.preventDefault();
-    const u_id = event.target[0].value;
+    const user_id = event.target[0].value;
 
-    if (!u_id) return;
+    if (!user_id) return;
 
-    axios.post(`/channel/invite`, { token, u_id, channel_id })
+    axios.post(`/channel/invite`, { token, user_id, channel_id })
       .then((response) => {
         console.log(response);
       })
-      .catch((err) => {});
+      .catch((err) => {
+        console.error(err);
+        toast.error(DEFAULT_ERROR_TEXT);
+      });
   }
   return (
     <div>
@@ -52,9 +57,9 @@ function AddMemberDialog({ channel_id, ...props }) {
             <TextField
               autoFocus
               margin="dense"
-              id="u_id"
+              id="user_id"
               label="User ID"
-              name="u_id"
+              name="user_id"
               fullWidth
             />
           </DialogContent>

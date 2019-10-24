@@ -15,12 +15,12 @@ import PersonAdd from '@material-ui/icons/PersonAdd';
 import PersonAddDisabled from '@material-ui/icons/PersonAddDisabled';
 import axios from 'axios';
 import React from 'react';
+import { toast } from 'react-toastify';
+import { CHANNEL_ERROR_TEXT, DEFAULT_ERROR_TEXT } from '../../utils/text';
 import AddMemberDialog from './AddMemberDialog';
 import ChannelMessages from './ChannelMessages';
 import AuthContext from '../../AuthContext';
 import { extractUId } from '../../utils/token';
-import { useInterval } from '../../utils';
-import { pollingInterval, getIsPolling, subscribeToStep, unsubscribeToStep } from '../../utils/update';
 
 function Channel({ channel_id, ...props }) {
   const [name, setName] = React.useState('');
@@ -29,7 +29,7 @@ function Channel({ channel_id, ...props }) {
   const token = React.useContext(AuthContext);
   const u_id = extractUId(token);
 
-  function fetchChannelData() {
+  function fetchChannelData(channel_id, token) {
     axios
       .get('/channel/details', {
         params: {
@@ -38,25 +38,22 @@ function Channel({ channel_id, ...props }) {
         },
       })
       .then(({ data }) => {
+        console.log(data);
         const { name, owner_members, all_members } = data;
         // assumes members of form [{ u_id, name_first, name_last }]
         setMembers(all_members);
         setOwners(owner_members);
         setName(name);
       })
-      .catch((err) => {});
+      .catch((err) => {
+        console.error(err);
+        toast.error(CHANNEL_ERROR_TEXT);
+      });
   }
 
   React.useEffect(() => {
-    fetchChannelData();
-    subscribeToStep(fetchChannelData);
-    return () => unsubscribeToStep(fetchChannelData);
-  }, [channel_id, token])
-
-  useInterval(() => {
-    if (getIsPolling()) fetchChannelData();
-  }, pollingInterval * 2);
-
+    fetchChannelData(channel_id, token);
+  }, [channel_id, token]);
 
   function joinChannel(channel_id, token) {
     axios
@@ -67,7 +64,10 @@ function Channel({ channel_id, ...props }) {
       .then(() => {
         fetchChannelData(channel_id, token);
       })
-      .catch((err) => {});
+      .catch((err) => {
+        console.error(err);
+        toast.error(DEFAULT_ERROR_TEXT);
+      });
   }
 
   function leaveChannel(channel_id, token) {
@@ -79,7 +79,10 @@ function Channel({ channel_id, ...props }) {
       .then(() => {
         fetchChannelData(channel_id, token);
       })
-      .catch((err) => {});
+      .catch((err) => {
+        console.error(err);
+        toast.error(DEFAULT_ERROR_TEXT);
+      });
   }
 
   function addOwner(u_id) {
@@ -92,7 +95,10 @@ function Channel({ channel_id, ...props }) {
       .then(() => {
         fetchChannelData(channel_id, token);
       })
-      .catch((err) => {});
+      .catch((err) => {
+        console.error(err);
+        toast.error(DEFAULT_ERROR_TEXT);
+      });
   }
 
   function removeOwner(u_id) {
@@ -105,19 +111,21 @@ function Channel({ channel_id, ...props }) {
       .then(() => {
         fetchChannelData(channel_id, token);
       })
-      .catch((err) => {});
+      .catch((err) => {
+        console.error(err);
+        toast.error(DEFAULT_ERROR_TEXT);
+      });
   }
 
   function userIsMember(members) {
-    return members.find((member) => parseInt(member.u_id,10) === parseInt(u_id,10)) !== undefined;
+    console.log(members);
+    return members.find((member) => member.u_id === u_id) !== undefined;
   }
 
   function userIsOwner(owners, u_id) {
-    return owners.find((owner) => parseInt(owner.u_id,10) === parseInt(u_id,10)) !== undefined;
+    return owners.find((owner) => owner.u_id === u_id) !== undefined;
   }
-
   const viewerIsOwner = userIsOwner(owners, u_id);
-
   return (
     <>
       <Typography variant="h4">{name.toUpperCase()}</Typography>

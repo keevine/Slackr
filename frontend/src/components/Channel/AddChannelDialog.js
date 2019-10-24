@@ -18,6 +18,8 @@ import Visibility from "@material-ui/icons/Visibility";
 import VisibilityOff from "@material-ui/icons/VisibilityOff";
 import Add from "@material-ui/icons/Add";
 import AuthContext from "../../AuthContext";
+import { toast } from "react-toastify";
+import { DEFAULT_ERROR_TEXT } from "../../utils/text";
 
 function AddChannelDialog({ ...props }) {
   const [open, setOpen] = React.useState(false);
@@ -40,9 +42,11 @@ function AddChannelDialog({ ...props }) {
       .post(`/channels/create`, { token, name, is_public })
       .then(response => {
         console.log(response);
-        props.callback();
       })
-      .catch(err => {});
+      .catch(err => {
+        console.error(err);
+        toast.error(DEFAULT_ERROR_TEXT);
+      });
   }
   return (
     <div>
