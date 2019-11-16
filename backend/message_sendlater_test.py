@@ -1,3 +1,5 @@
+#pylint: disable=missing-docstring
+#pylint: disable=unused-variable
 import datetime
 import pytest
 
@@ -138,9 +140,8 @@ def test_message_sendlater_8():
     channel = channels_create(owner_token, "Channel Name", True)
     channel_id = channel['channel_id']
     channel_join(u_token, channel_id)
-    assert message_sendlater(u_token, channel_id, r"~!@#$%^&*()_+[]{}\|;:'',.<>/?", future_time) == {
-        'message_id': 1
-    }
+    assert (message_sendlater(u_token, channel_id, r"~!@#$%^&*()_+[]{}\|;:'',.<>/?", future_time)
+            == {'message_id': 1})
     assert get_data()['messages'] == [{
         'message_id': 1,
         'u_id': u_id,

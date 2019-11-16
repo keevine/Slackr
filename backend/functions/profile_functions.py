@@ -81,17 +81,26 @@ def user_profile_uploadphoto(token, img_url, x_start, y_start, x_end, y_end):
 	user['profile_img_url'] = img_url
 	# Extract the image from the URL and store at 'filePath' location
 
+	# Create a counter to store unique photos i.e photo1.png, photo2.png etc
+	# At the moment this doesnt work because I haven't made it global so it
+	# will always be 1
 	userCounter = 1
 	filePath = "backend/functions/pictures/profile_pic" + str(userCounter) + ".jpg"
 	userCounter += 1
+	# Save the picture from the URL to the filepath
 	urllib.request.urlretrieve(img_url,filePath)
+	# Print to debug to terminal
 	print("Successfully saved the user image")
-	# Crop picture and save it
-
+	
+	# Crop picture section
+	# Open the image
 	imageObject = Image.open(filePath)
+	# Crop to dimensions and save
 	cropped = imageObject.crop((x_start, y_start, x_end, y_end))
 	cropped.save(filePath)
+	# Print to debug to terminal
 	print("Successfully cropped the user image")
+	# Return nothing as specified
 	return{}
 
 def user_listall(token):

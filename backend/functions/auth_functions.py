@@ -1,44 +1,36 @@
-from .data import *
+from .data import get_data, valid_email, hash_password, get_u_id, user_dict, generate_token, decode_token,is_logged_in
+from .exceptions import ValueError, AccessError
 
 def auth_register(email, password, name_first, name_last):
 
     data = get_data()
+
     #check if email already exist
-    if valid_email(email) == True:
+    if valid_email(email):
         if get_u_id(email) != None:
             raise ValueError(f"Email: {email} is already registered")
     else:
         raise ValueError(f"Email: {email} is invalid")
 
     #rules for length of pasword
-    if len(password) < 6: 
+    MIN_LENGTH = 6
+    if len(password) < MIN_LENGTH: 
         raise ValueError(f"Password Length is too short")
 
-    #rules for first and last name
-    if len(name_first) < 1:
-        raise ValueError(f"First name: {name_first} is too short")
-    elif len(name_first) > 50:
-        raise ValueError(f"First name: {name_first} is too long")
-    elif len(name_last) < 1:
-        raise ValueError(f"Last name: {name_last} is too short")
-    elif len(name_last) > 50:
-        raise ValueError(f"Last name: {name_last} is too long")
+    #check first and last name is valid in accordance to specs
+    name_check(name_first, name_last)
 
+    #create a unique handle
     handle = ''.join((name_first, name_last))
-    for user in data['users']: #generate unique handle
-        if handle == user['handle']:
-            handle += str(1 + len(data['users']))
+    generate_handle(handle)
 
+    #prepare u_id, token and password (hashed in db)
     hashedPassword = hash_password(password)
     u_id = 101 + len(data['users'])
     token = generate_token(u_id)
 
     #generate appropriate permission id
-    if len(data['users']) == 0:
-        permission_id = 1
-    else:
-        permission_id = 3
-
+    permission_id = generate_permission_id()
 
     #append all relevant information to users dictionary
     data['users'].append({
@@ -62,7 +54,7 @@ def auth_register(email, password, name_first, name_last):
 def auth_login(email, password):
 
     data = get_data()
-    if valid_email(email) == False: #check valid email
+    if not valid_email(email): #check valid email
         raise ValueError(f"Email: {email} is invalid")
 
     #check if email exists and if so check if password matches
@@ -78,10 +70,8 @@ def auth_login(email, password):
 
     raise ValueError(f"Email: {email} does not exist or password is incorrect")
 
-
-
 def auth_logout(token):
-    if is_logged_in(token) == True: #only logout if user is already logged in
+    if is_logged_in(token): #only logout if user is already logged in
         u_id = decode_token(token)
         user = user_dict(u_id)
         user['tokens'].remove(token)
@@ -100,3 +90,32 @@ def auth_passwordreset_reset(reset_code, new_password):
             user['password'] = new_password
             return {}
     raise ValueError(f"User does not exist")
+
+######################  HELPER FUNCTIONS  ########################
+
+def name_check(name_first, name_last):
+    MAX = 50
+    MIN = 1
+    if len(name_first) > MAX:
+        raise ValueError(f"First name: {name_first} is longer than 50 characters")
+    if len(name_first) < MIN:
+        raise ValueError(f"First name: {name_first} cannot be empty")
+    if len(name_last) > MAX:
+        raise ValueError(f"Last name: {name_last} is longer than 50 characters")
+    if len(name_last) < MIN:
+        raise ValueError(f"Last name: {name_last} cannot be empty")
+
+
+def generate_handle(handle):
+    data = get_data()
+    for user in data['users']: #generate unique handle
+        if handle == user['handle']:
+            handle += str(1 + len(data['users']))
+
+def generate_permission_id():
+    data = get_data()
+    if len(data['users']) == 0:
+        permission_id = 1
+    else:
+        permission_id = 3
+    return permission_id

@@ -46,9 +46,8 @@ def test_message_react_1():
     data, user1, user_id1, user2, user_id2, channel1 = setup()
     message_send(user1,channel1,'Hey guys they just released reacts on slackr')
     assert message_react(user1,1,1) == {}
-    for messagedict in data['messages']:
-        if messagedict['message_id'] == 1:
-            assert messagedict['reacts'][0] == {'react_id': 1, 'u_ids': [101], 'is_this_user_reacted': True}
+    messagedict = message_dict(1)
+    assert messagedict['reacts'][0] == {'react_id': 1, 'u_ids': [101], 'is_this_user_reacted': True}
 
 #Testing user reacting to own message with invalid react (React_id 2)
 def test_message_react_2():

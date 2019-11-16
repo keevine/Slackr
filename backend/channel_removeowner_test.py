@@ -1,3 +1,6 @@
+''' Pytest functions used to test `channel_removeowner()`'''
+#pylint: disable=missing-docstring
+#pylint: disable=unused-variable
 import pytest
 
 from functions.auth_functions import auth_register

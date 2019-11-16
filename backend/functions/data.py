@@ -100,9 +100,16 @@ def message_dict(message_id):
         if message_id == messages['message_id']:
             return messages
     return None
-
+    
+def react_dict(messagedict, react_id):
+    data = get_data()
+    for react_dict in messagedict['reacts']:
+        if react_dict['react_id'] == react_id:
+            return react_dict
+    return None
+    
 # Inserts a message into the global message list and channel specific message list
-def message_insert(channel_id, message_id):
+def message_insert(channel_id, message_dict):
     data = get_data()
     channel = channel_dict(channel_id)
     channel['messages'].insert(0, message_dict)

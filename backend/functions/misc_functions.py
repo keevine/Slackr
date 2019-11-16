@@ -16,8 +16,13 @@ def search(token, query_str):
 	return {'messages': messages}
 
 def admin_userpermission_change(token, u_id, permission_id):
+
+	OWNER = 1
+	ADMIN = 2
+	MEMBER = 3
+
 	# Check if the permissons are valid
-	if permission_id != 1 and permission_id != 2 and permission_id != 3:
+	if permission_id != OWNER and permission_id != ADMIN and permission_id != MEMBER:
 		raise ValueError(f"Invalid permission id change: {permission_id} requested")
 
 	# Retrieve data
@@ -29,14 +34,15 @@ def admin_userpermission_change(token, u_id, permission_id):
 		raise ValueError(f"User ID: {u_id} does not refer to a valid user")
 
 	caller_permission = caller_user['permission_id']
-	# Check if the operation is valid
-	if caller_permission == 3:
+
+	# Members not allowed to change anyones permission
+	if caller_permission == MEMBER:
 		raise AccessError(f"Authorised user: {caller_id} is not an admin or owner")
-	# Change permissions, unless already an admin
-	if caller_permission == 1 or secondary_user['permission_id'] != 1:
+	#only owner's can moidify other owners permission. If caller is admin instead, then the secondary user cannot be an owner
+	if caller_permission == OWNER or secondary_user['permission_id'] != OWNER:
 		secondary_user['permission_id'] = permission_id
 	else:
-		raise AccessError("Owner cannot change admin permissions")
+		raise AccessError("Admin cannot change owner permissions")
 
 	return {}
 

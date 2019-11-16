@@ -1,3 +1,7 @@
+''' Pytest functions used to test `channels_create()`'''
+#pylint: disable=missing-docstring
+#pylint: disable=unused-variable
+
 import pytest
 
 from functions.auth_functions import auth_register

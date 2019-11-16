@@ -133,40 +133,36 @@ def channel_details(token, channel_id):
 # Display messages sent to the channel
 def channel_messages(token, channel_id, start):
     data = get_data()
-    end = start + 50
-    messages = []
     #Checking channel_id is valid
-    newchannel = {}
-    for channel in data['channels']:
-        if(channel['channel_id'] == channel_id):
-            newchannel.update(channel)
-    if not newchannel:
+    if not is_valid_channel(channel_id):
         raise ValueError(f"Invalid channel ID: {channel_id}")
     #Checking length of messages
-    if(start > len(newchannel['messages'])):
+    channeldict = channel_dict(channel_id)
+    if(start > len(channeldict['messages'])):
         raise ValueError(f"Start index: {start} is greater than the amount of messages")
-    u_id = decode_token(token)
-    for message in data['messages']:
-        for react in message['reacts']:
-            if u_id not in react['u_ids']:
-                react['is_this_user_reacted'] = False
-            else:
-               react['is_this_user_reacted'] = True
     #Checking if user is authorised in correct channel
+    u_id = decode_token(token)
     if(is_member(u_id, channel_id) == False):
         raise AccessError(f"User: {u_id} is not a member of channel: {channel_id}")
-    if end > len(newchannel['messages']):
-        endindex = len(newchannel['messages'])
+    #Update React Status
+    update_react_status(u_id)
+    #Channel messages setup
+    display_message_list = []
+    end = start + 50
+    if end > len(channeldict['messages']):
+        endindex = len(channeldict['messages'])
         end = -1
     else:
         endindex = end
-    for i in range(start,endindex):
-        timestamp = datetime.now().timestamp()
-        print(timestamp)
-        if timestamp > newchannel['messages'][i]['time_created']:
-            messages.append(newchannel['messages'][i])
-    newchannel['messages'].sort(key = lambda i: i['time_created'],reverse=True)
-    return {'messages': messages, 'start': start, 'end': end,}
+    timestamp = datetime.now().timestamp()
+    #Channel messages functionality
+    for message in range(start,endindex):
+        #Check if the current time is > then the time the message is created
+        if timestamp > channeldict['messages'][message]['time_created']:
+            #If it is, it gets appended to a 'display list'
+            display_message_list.append(channeldict['messages'][message])
+    channeldict['messages'].sort(key = lambda i: i['time_created'],reverse=True)
+    return {'messages': display_message_list, 'start': start, 'end': end,}
 
     #given start return end which is start + 50 or -1 if theres no more messages
 
@@ -185,15 +181,17 @@ def user_join(u_id, channel_id):
     if is_member(u_id, channel_id): #verify user not already part of channel
         raise ValueError(f"User: {u_id} has already joined channel: {channel_id}")
 
+
     #validate users pemission before joining as member/owner
-    if user['permission_id'] != 3:
+    MEMBER = 3
+    if user['permission_id'] != MEMBER:
         channel['owner_members'].append({
             'u_id' : u_id
         })
         channel['all_members'].append({
             'u_id' : u_id
         })
-    elif user['permission_id'] == 3 and channel['is_public'] == True:
+    elif user['permission_id'] == MEMBER and channel['is_public']:
         channel['all_members'].append({
             'u_id' : u_id
         })
@@ -221,3 +219,14 @@ def remove_from_list(u_id, channel_id, member_type):
     for member in channel[member_type]:
         if member['u_id'] == u_id:
             channel[member_type].remove(member)
+
+# Helper function used in channel messages
+# Loops through react dicts in message list and updates status of reacts          
+def update_react_status(u_id):
+    data = get_data()
+    for message in data['messages']:
+        for react in message['reacts']:
+            if u_id not in react['u_ids']:
+                react['is_this_user_reacted'] = False
+            else:
+                react['is_this_user_reacted'] = True

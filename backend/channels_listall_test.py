@@ -1,3 +1,7 @@
+''' Pytest functions used to test `channels_listall()`'''
+#pylint: disable=missing-docstring
+#pylint: disable=unused-variable
+
 from functions.auth_functions import auth_register
 from functions.channel_functions import channels_create, channel_join, channels_listall
 

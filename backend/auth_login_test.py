@@ -1,6 +1,6 @@
 import pytest
 from functions.auth_functions import auth_register, auth_logout, auth_login
-from functions.data import *
+from functions.data import reset_data, is_logged_in
 
 from functions.exceptions import ValueError, AccessError
 
